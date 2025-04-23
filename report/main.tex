@@ -47,7 +47,17 @@
     language=python,
     style=mystyle
 }
-
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    filecolor=blue!70!black,
+    urlcolor=blue!70!black,
+    citecolor=blue!70!black,
+    pdftitle={Breaking RSA with Quantum Fourier Transforms},
+    pdfauthor={Group Assignment 1},
+    pdfborder={0 0 0},
+}
 % If you don't want to use the physics package, uncomment this line:
 % \newcommand{\ket}[1]{|#1\rangle}
 
@@ -65,6 +75,8 @@
         \LARGE\textsc{Group Assignment 1}\vspace{3cm}\\[2ex]
         \textbf{\Large Group Members}\vspace{0.5cm}\\[1ex]
         \begin{tabular}{r|l} 
+            \hline \hline
+            \textsc{Name} & \textsc{Roll No.} \\ \hline 
             Abhishek \textsc{Mantri}        & B23060 \\ 
             Harshit \textsc{Jain}           & B23132 \\
             Arani \textsc{Ghosh}            & B23119 \\
@@ -223,10 +235,32 @@ The Elliptic Curve Factorization method (ECF), or Elliptic Curve Method (ECM), i
     where $\omega$ represents angular frequency, $j$ is the imaginary unit $\sqrt{-1}$, and $e^{-j\omega t} = \cos(\omega t) - j\sin(\omega t)$ are the complex exponential basis functions.
 \end{definition}
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\textwidth]{./pics/convolv.png}
+    \caption{Fourier Transform}
+    \label{fig:fourier_transform}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\textwidth]{./pics/decomp.png}
+    \caption{Signal Decomposition}
+    \label{fig:signal_decomp}
+\end{figure}
+
+
 The inverse Fourier Transform allows reconstruction of the original signal from its frequency components:
 \[
     f(t) = \frac{1}{2\pi} \int_{-\infty}^{\infty} F(\omega) e^{j\omega t} \, d\omega
 \]
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\textwidth]{./pics/inverse-fourier-transform.png}
+    \caption{Inverse Fourier Transform}
+    \label{fig:inv_fourier_transform}
+\end{figure}
 
 For practical applications with discrete signals (like digital cryptographic data), the Discrete Fourier Transform (DFT) is used:
 \[
@@ -239,6 +273,64 @@ where:
 \end{itemize}
 
 The DFT is computationally expensive, requiring $\mathcal{O}(N^2)$ operations. The Fast Fourier Transform (FFT) algorithm reduces this to $\mathcal{O}(N \log N)$, making it feasible for large datasets.
+
+\lstinputlisting[caption=Basic Implementation of Fast Fourier Transform using NumPy]{../sims/fourier_basic_implementation.py}
+
+
+\section{Fourier Transforms and Wrapped Waveforms}
+
+The Fourier transform can be intuitively understood through the concept of "wrapped waveforms" and their centers of gravity, providing a geometric interpretation of frequency analysis.
+
+\subsection{The Wrapping Process}
+
+Imagine taking a time-domain signal $f(t)$ and wrapping it around the unit circle in the complex plane:
+
+\begin{itemize}
+    \item For a specific frequency $\omega$, each time point $t$ corresponds to a position $e^{j\omega t}$ on the unit circle.
+    \item The value of $f(t)$ at each point determines the "weight" placed at that position on the circle.
+    \item As we integrate over all time, we effectively distribute weights around the circle according to the signal's values.
+\end{itemize}
+
+\subsection{Center of Gravity Interpretation}
+
+The Fourier transform $F(\omega)$ at frequency $\omega$ can be interpreted as the center of gravity (or center of mass) of this wrapped waveform:
+
+\[
+    F(\omega) = \int_{-\infty}^{\infty} f(t) e^{-j\omega t} \, dt
+\]
+
+When the frequency $\omega$ matches a significant frequency component in the signal:
+\begin{itemize}
+    \item The signal wraps in a way that aligns coherently around the circle
+    \item Weights accumulate at specific positions rather than canceling out
+    \item The center of gravity moves away from the origin, resulting in a larger magnitude $|F(\omega)|$
+\end{itemize}
+
+When $\omega$ doesn't match a frequency present in the signal:
+\begin{itemize}
+    \item The signal wraps incoherently, distributing weights more uniformly around the circle
+    \item These uniform weights tend to cancel each other out
+    \item The center of gravity remains close to the origin, resulting in a smaller magnitude $|F(\omega)|$
+\end{itemize}
+
+\subsection{Mathematical Expression}
+
+If we express the complex exponential in terms of sines and cosines:
+\[
+    F(\omega) = \int_{-\infty}^{\infty} f(t) \cos(\omega t) \, dt - j\int_{-\infty}^{\infty} f(t) \sin(\omega t) \, dt
+\]
+
+The real part represents the projection of the center of gravity onto the real axis, while the imaginary part represents the projection onto the imaginary axis.
+
+\begin{figure}[p]
+    \centering
+    \rotatebox{90}{
+        \includegraphics[width=0.95\textheight]{./pics/complete_fourier.png}
+    }
+    \caption{Wrapping and its relation to Fourier Transform}
+    \label{fig:complete_fourier}
+\end{figure}
+
 
 \section{Introduction to Quantum Computing}
 Quantum computing is an emerging paradigm that leverages the principles of quantum mechanics to process information in fundamentally new ways. Unlike classical computing, which relies on bits to represent data as either 0 or 1, quantum computing introduces the concept of qubits---quantum bits---that enable powerful computational capabilities through unique quantum phenomena.
@@ -320,6 +412,12 @@ The QFT can be efficiently implemented using a sequence of quantum gates:
 \end{itemize}
 
 This implementation requires $\mathcal{O}(n^2)$ quantum gates, making it exponentially faster than the classical Fast Fourier Transform (FFT) for large datasets.
+
+\subsection{Connection to Wrapping Intuition}
+
+This wrapping process provides an intuitive basis for understanding the Quantum Fourier Transform. In quantum computing, the QFT essentially performs this wrapping operation on quantum amplitudes rather than classical signal values. The phase relationships between different components of a quantum state play a role analogous to the weights distributed around the unit circle.
+
+When a quantum state has periodic structure, the QFT transforms this into a state with amplitudes concentrated at specific frequencies—just as a periodic classical signal produces peaks in its Fourier spectrum. This property makes the QFT particularly useful for detecting periodicity in quantum algorithms like Shor's, which is crucial for factoring integers.
 
 \subsection{Applications}
 
@@ -448,24 +546,79 @@ Despite their potential, quantum computers face several significant practical ch
     \item \textbf{Isogeny-Based:} SIKE (broken), FrodoKEM.
 \end{itemize}
 
+\newpage
+
+\section{Conclusion}
+
+This report has explored the vulnerabilities of RSA encryption, particularly in the context of quantum computing threats. We've examined conventional weaknesses such as poor prime selection, where techniques like \textbf{Fermat's factorization} can efficiently break RSA when primes are too close together, and \textbf{Elliptic Curve Factorization} when one prime is significantly smaller than the other.
+
+The heart of our analysis focused on \textbf{quantum computing's ability to fundamentally undermine RSA's security guarantees}. Through an examination of quantum principles like superposition and the \textbf{Quantum Fourier Transform}, we demonstrated how \textbf{Shor's algorithm} provides an exponential speedup over classical factoring methods, reducing the time complexity from sub-exponential to polynomial \textbf{$\mathcal{O}((\log N)^3)$}. This efficiency makes it theoretically possible to break even large RSA keys in reasonable timeframes on sufficiently powerful quantum computers.
+
+While \textit{quantum fixed-point attacks} offer alternative methods to compromise RSA encryption, significant practical challenges remain in quantum computing implementation:
+
+\begin{itemize}
+    \item \textbf{Prohibitive costs and infrastructure requirements}
+    \item \textbf{Qubit fragility and decoherence}
+    \item \textbf{Lack of mature software development toolchains}
+\end{itemize}
+
+The imminent threat to RSA has accelerated research into \textbf{post-quantum cryptographic alternatives}, with various approaches including:
+
 \begin{center}
-    \begin{tabular}{|l|l|l|}
+    \begin{tabular}{|c|c|c|}
         \hline
-        \textbf{Feature}           & \textbf{RSA}         & \textbf{Post-Quantum Alternatives} \\
+        \rowcolor{gray!20} \textbf{Lattice-Based} & \textbf{Code-Based} & \textbf{Hash-Based} \\
         \hline
-        Security (Classical)       & Good with large keys & Designed to be secure              \\
-        Security (Quantum)         & Vulnerable           & Resistant                          \\
-        Key Sizes                  & Moderate to large    & Varies                             \\
-        Signature/Ciphertext Sizes & Moderate             & Varies                             \\
-        Performance                & Efficient            & Varies                             \\
-        Maturity                   & Well-established     & Under research                     \\
+        CRYSTALS-KYBER                            & Classic McEliece    & SPHINCS+            \\
+        DILITHIUM                                 &                     & XMSS                \\
+        NTRU                                      &                     & LMS                 \\
         \hline
     \end{tabular}
 \end{center}
 
-\section{Conclusion}
+Organizations like \textbf{NIST} are actively standardizing these new methods to ensure data security in a post-quantum world.
+
+As quantum computing technology advances, the transition to \textbf{quantum-resistant cryptographic systems} becomes increasingly urgent. The future of secure communication will likely involve a hybrid approach during the transition period, ultimately leading to widespread adoption of post-quantum cryptographic standards that can withstand attacks from both classical and quantum adversaries.
+
+\newpage
 \section{Acknowledgements}
+
+We sincerely thank \textbf{Dr. Krishna Mohan Parattu} Sir for providing us with this valuable opportunity. We also acknowledge \textbf{Awaneesh Kumar Yadav} Sir and his course, Information Security and Privacy, for enriching our understanding of cryptography. Their guidance and encouragement were instrumental in shaping this project.
+
+We are grateful to \textbf{Anthropic} for offering the tools and resources that supported our development process.
+
+We extend our appreciation to open source resources like Qiskit, NumPy, and educational YouTube channels, especially \textbf{3Blue1Brown}, which have been invaluable in helping us visualize and understand complex mathematical concepts.
+
+Lastly, we deeply appreciate our parents and peers for their constant support and motivation throughout this journey.
+
+\newpage
 \section{References}
+
+\begin{enumerate}
+    \item 3Blue1Brown. (2018). "But what is the Fourier Transform? A visual introduction." [Video]. YouTube.
+          \url{https://youtu.be/spUNpyF58BY}
+
+    \item Sabine Hossenfelder. (2022). "What the HECK is a Quantum Computer? Let us break it down for ya." [Video]. YouTube.
+          \url{https://youtu.be/lvTqbM5Dq4Q}
+
+    \item Obregon, A. (2023). "A Beginner's Guide to Quantum Computing Fundamentals." Medium.
+          \url{https://medium.com/@AlexanderObregon/a-beginners-guide-to-quantum-computing-fundamentals-c11de9187892}
+
+    \item Wikipedia contributors. (2023). "Quantum Fourier transform." Wikipedia, The Free Encyclopedia.
+          \url{https://en.wikipedia.org/wiki/Quantum_Fourier_transform}
+
+    \item Wikipedia contributors. (2023). "Qubit." Wikipedia, The Free Encyclopedia.
+          \url{https://en.wikipedia.org/wiki/Qubit}
+
+    \item PhysicsWorks. (2018). "Quantum Fourier Transform." PhysicsWorks.
+          \url{https://physicsworks2.com/quantum%20information%20and%20computation/2018/05/02/quantum-fourier-transform.html}
+
+    \item Post-Quantum. (2023). "Shor's Algorithm: A Quantum Threat." Post-Quantum.
+          \url{https://postquantum.com/post-quantum/shors-algorithm-a-quantum-threat/}
+
+    \item Quantum Zeitgeist. (2023). "Beyond the Hype: Understanding the Limitations of Quantum Tech." Quantum Zeitgeist.
+          \url{https://quantumzeitgeist.com/beyond-the-hype-understanding-the-limitations-of-quantum-tech/}
+\end{enumerate}
 
 \newpage
 \section{Roles and Responsibilities}
@@ -474,21 +627,21 @@ This project was completed through collaborative effort, with each team member m
 \begin{center}
     \begin{tabularx}{\textwidth}{|l|X|c|c|c|}
         \hline
-        \rowcolor{gray!20} \textbf{Team Member} & \textbf{Research Topics}                                                                                   & \textbf{PPT} & \textbf{Report} & \textbf{Simulations} \\
+        \rowcolor{gray!20} \textbf{Team Member} & \textbf{Research Topics}                                                    & \textbf{PPT} & \textbf{Report} & \textbf{Simulations} \\
         \hline
-        \textbf{Jigar Fufal}                    & RSA fundamentals and weaknesses, Post-quantum cryptographic alternatives                                   & \checkmark   & \checkmark      &                      \\
+        \textbf{Jigar Fufal}                    & RSA fundamentals and weaknesses, Post-quantum cryptographic alternatives    & \checkmark   & \checkmark      &                      \\
         \hline
-        \textbf{Ojas More}                      & Weak RSA exploitation using Fermat's theorem, Close prime factorization using Elliptic Curve Factorization &              & \checkmark      &                      \\
+        \textbf{Ojas More}                      & Elliptic Curve Factorization, Fized Point Attacks on RSA                    &              & \checkmark      &                      \\
         \hline
-        \textbf{Parth Gawande}                  & Fourier Transform theory, Fixed Point Attacks on RSA                                                       &              & \checkmark      & \checkmark           \\
+        \textbf{Parth Gawande}                  & Fourier Transform and Wrapping theory, Fermat's Factorization Theorem       &              & \checkmark      &                      \\
         \hline
-        \textbf{Abhishek Mantri}                & Practical limitations of quantum computing                                                                 & \checkmark   & \checkmark      &                      \\
+        \textbf{Abhishek Mantri}                & Practical limitations of quantum computing                                  & \checkmark   & \checkmark      &                      \\
         \hline
-        \textbf{Arani Ghosh}                    & Quantum Fourier Transform (QFT) and its application in Shor's Algorithm                                    & \checkmark   & \checkmark      &                      \\
+        \textbf{Arani Ghosh}                    & Quantum Fourier Transform (QFT) and its application in Shor's Algorithm     & \checkmark   & \checkmark      &                      \\
         \hline
-        \textbf{Arka Mukhopadhay}               & Introduction to quantum computing, qubit theory, quantum measurement theory                                &              & \checkmark      & \checkmark           \\
+        \textbf{Arka Mukhopadhay}               & Introduction to quantum computing, qubit theory, quantum measurement theory &              & \checkmark      & \checkmark           \\
         \hline
-        \textbf{Harshit Jain}                   & Shor's Algorithm, Quantum Gates                                                                            & \checkmark   & \checkmark      &                      \\
+        \textbf{Harshit Jain}                   & Shor's Algorithm, Quantum Gates and Qubits                                  & \checkmark   & \checkmark      & \checkmark           \\
         \hline
     \end{tabularx}
 \end{center}

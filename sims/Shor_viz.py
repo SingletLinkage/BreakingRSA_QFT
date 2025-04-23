@@ -28,7 +28,7 @@ class ShorsAlgorithm(Scene):
         self.play(FadeOut(subtitle), FadeOut(intro_text), FadeOut(intro_formula))
         
         # Load and display circuit
-        circuit_image = ImageMobject('../media/images/shor_circuit.png').scale(0.5)
+        circuit_image = ImageMobject('./report/pics/shor_circuit.png').scale(0.5)
         circuit_image.to_edge(UP, buff=1.5)
         self.play(FadeIn(circuit_image))
         self.wait(2)

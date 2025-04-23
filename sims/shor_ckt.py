@@ -48,4 +48,4 @@ def shors_circuit():
 
 # Save circuit as image
 qc = shors_circuit()
-qc.draw(output='mpl', filename='../media/images/shor_circuit.png')
+qc.draw(output='mpl', filename='./report/pics/shor_circuit.png')
