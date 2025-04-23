@@ -58,6 +58,62 @@
     pdfauthor={Group Assignment 1},
     pdfborder={0 0 0},
 }
+
+% Add this to your preamble
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+
+% Define alert box styles
+\newtcolorbox{infobox}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title={Information},
+    #1
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=yellow!10!white,
+    colframe=yellow!75!black,
+    fonttitle=\bfseries,
+    title={Warning},
+    #1
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title={Success},
+    #1
+}
+
+\newtcolorbox{errorbox}[1][]{
+    colback=red!5!white,
+    colframe=red!75!black,
+    fonttitle=\bfseries,
+    title={Error},
+    #1
+}
+
+\newtcolorbox{notebox}[1][]{
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    title={Note},
+    #1
+}
+
+\newtcolorbox{definitionbox}[1][]{
+    colback=purple!5!white,
+    colframe=purple!75!black,
+    fonttitle=\bfseries,
+    title={Definition},
+    #1
+}
+
+
+
 % If you don't want to use the physics package, uncomment this line:
 % \newcommand{\ket}[1]{|#1\rangle}
 
@@ -72,7 +128,8 @@
 \title{\Huge\textsc{Breaking RSA \\ with \\ Quantum Fourier Transforms}}
 \author{
     \Large\textsc{\vspace{2cm} IC121 Applications of Particles and Waves}\\[2ex]
-        \LARGE\textsc{Group Assignment 1}\vspace{3cm}\\[2ex]
+        \LARGE\textsc{Group Assignment 1}\vspace{0.5cm}\\
+        \Large{Group Number: 19}\\[2cm]
         \textbf{\Large Group Members}\vspace{0.5cm}\\[1ex]
         \begin{tabular}{r|l} 
             \hline \hline
@@ -86,7 +143,7 @@
             Parth \textsc{Gawande}          & B24266 \\ 
             \hline \hline
         \end{tabular}
-        \vspace{2cm}
+        \vspace{5cm}
 }
 \date{\today}
 
@@ -99,7 +156,9 @@
 
 \section{What is RSA?}
 
-RSA is an asymmetric cryptography algorithm widely used for secure data transmission. Asymmetric, or public-key cryptography, uses two different keys: a public key for encryption and a private key for decryption. The public key can be freely distributed, while the private key must be kept secret.
+\begin{infobox}[title=RSA Overview]
+    RSA is an asymmetric cryptography algorithm widely used for secure data transmission. Asymmetric, or public-key cryptography, uses two different keys: a public key for encryption and a private key for decryption. The public key can be freely distributed, while the private key must be kept secret.
+\end{infobox}
 
 \subsection{RSA Key Generation}
 
@@ -129,30 +188,32 @@ The public key is $(n, e)$. The private key is $(n, d)$. The primes $p$ and $q$,
 \]
 
 \section{Weaknesses of RSA}
-Despite its widespread use, RSA has several vulnerabilities:
 
-\begin{itemize}
-    \item \textbf{Poor Choice of Primes:} If the primes $p$ and $q$ are chosen poorly, factorization becomes easier. For example, if $p$ and $q$ are too close to each other (e.g., $|p-q| \ll \sqrt{n}$), Fermat's factorization method becomes efficient. Similarly, if one prime is significantly smaller than the other, Elliptic Curve Factorization (ECF) can effectively factor the modulus.
+\begin{warningbox}[title=Security Vulnerabilities]
+    Despite its widespread use, RSA has several vulnerabilities:
 
-    \item \textbf{Small Modulus:} If the modulus $n$ is too small, it can be factored easily. Secure RSA uses moduli of at least 2048 bits.
+    \begin{itemize}
+        \item \textbf{Poor Choice of Primes:} If the primes $p$ and $q$ are chosen poorly, factorization becomes easier. For example, if $p$ and $q$ are too close to each other (e.g., $|p-q| \ll \sqrt{n}$), Fermat's factorization method becomes efficient. Similarly, if one prime is significantly smaller than the other, Elliptic Curve Factorization (ECF) can effectively factor the modulus.
 
-    \item \textbf{Low Public Exponent:} A small exponent $e$ (e.g., 3) may speed up encryption, but if used improperly (e.g., encrypting the same message with the same $e$ and different moduli), it can allow recovery of the plaintext using techniques like the Chinese Remainder Theorem. Also, if $m^e < n$, the ciphertext $c = m^e$ leaks $m$ directly.
+        \item \textbf{Small Modulus:} If the modulus $n$ is too small, it can be factored easily. Secure RSA uses moduli of at least 2048 bits.
 
-    \item \textbf{Weak Random Number Generation:} Poor or predictable generation of primes $p$ and $q$ can allow attackers to factor $n$ and break the encryption.
+        \item \textbf{Low Public Exponent:} A small exponent $e$ (e.g., 3) may speed up encryption, but if used improperly (e.g., encrypting the same message with the same $e$ and different moduli), it can allow recovery of the plaintext using techniques like the Chinese Remainder Theorem. Also, if $m^e < n$, the ciphertext $c = m^e$ leaks $m$ directly.
 
-    \item \textbf{Side-Channel Attacks:} These exploit physical characteristics like timing or power usage during encryption/decryption to gain insights into the private key.
+        \item \textbf{Weak Random Number Generation:} Poor or predictable generation of primes $p$ and $q$ can allow attackers to factor $n$ and break the encryption.
 
-    \item \textbf{Advanced Factoring Algorithms:} Techniques such as the General Number Field Sieve (GNFS) continue to improve and pose a threat to RSA's long-term security.
+        \item \textbf{Side-Channel Attacks:} These exploit physical characteristics like timing or power usage during encryption/decryption to gain insights into the private key.
 
-    \item \textbf{Quantum Threats:} Algorithms like Shor's, running on quantum computers, can factor large integers efficiently, potentially rendering RSA obsolete.
-\end{itemize}
+        \item \textbf{Advanced Factoring Algorithms:} Techniques such as the General Number Field Sieve (GNFS) continue to improve and pose a threat to RSA's long-term security.
+
+        \item \textbf{Quantum Threats:} Algorithms like Shor's, running on quantum computers, can factor large integers efficiently, potentially rendering RSA obsolete.
+    \end{itemize}
+\end{warningbox}
 
 \section{Fermat's Factorization for Close Primes}
 
-\begin{definition}[Fermat's Factorization]
+\begin{definitionbox}[title=Fermat's Factorization]
     If $n = a^2 - b^2 = (a - b)(a + b)$, then $p = a - b$ and $q = a + b$ are factors of $n$.
-\end{definition}
-
+\end{definitionbox}
 
 Fermat's factorization method exploits a fundamental algebraic identity: the difference of squares. When an RSA modulus $n = pq$ can be expressed as $a^2 - b^2$ for some integers $a$ and $b$, we can immediately factor $n$ as $(a-b)(a+b)$.
 \newline
@@ -184,13 +245,15 @@ This vulnerability highlights why proper RSA implementations should use primes t
 
 \lstinputlisting[caption=SageMath Implementation of Fermat's Factorization Theorem]{../sims/fermats_sage.sage}
 
-This implementation demonstrates Fermat's factorization method, which is particularly effective when the prime factors are close together. The algorithm starts with the ceiling of the square root of the modulus and increments until it finds a value that makes $a^2 - n$ a perfect square, allowing for easy factorization.
+\begin{notebox}[title=Implementation Note]
+    This implementation demonstrates Fermat's factorization method, which is particularly effective when the prime factors are close together. The algorithm starts with the ceiling of the square root of the modulus and increments until it finds a value that makes $a^2 - n$ a perfect square, allowing for easy factorization.
+\end{notebox}
 
 \section{Elliptic Curve Factorization (ECF)}
 
-\begin{definition}
+\begin{definitionbox}[title=ECF Definition]
     Elliptic Curve Factorization (ECF), developed by Hendrik Lenstra, is a probabilistic algorithm whose running time primarily depends on the size of the smallest prime factor of $n$, rather than the size of $n$ itself.
-\end{definition}
+\end{definitionbox}
 
 ECF operates by performing computations on randomly chosen elliptic curves over finite fields. Unlike Fermat's factorization method, which is specifically efficient when factors are close together, ECF is more versatile and effective when $n$ has relatively small prime factors, regardless of their proximity.
 
@@ -227,13 +290,13 @@ The Elliptic Curve Factorization method (ECF), or Elliptic Curve Method (ECM), i
 
 \section{Fourier Transform}
 
-\begin{definition}
+\begin{definitionbox}[title=Fourier Transform]
     The Fourier Transform of a function $f(t)$ is a mathematical transformation that decomposes the function into its constituent frequencies:
     \[
         F(\omega) = \int_{-\infty}^{\infty} f(t) e^{-j\omega t} \, dt
     \]
     where $\omega$ represents angular frequency, $j$ is the imaginary unit $\sqrt{-1}$, and $e^{-j\omega t} = \cos(\omega t) - j\sin(\omega t)$ are the complex exponential basis functions.
-\end{definition}
+\end{definitionbox}
 
 \begin{figure}[!ht]
     \centering
@@ -333,16 +396,21 @@ The real part represents the projection of the center of gravity onto the real a
 
 
 \section{Introduction to Quantum Computing}
-Quantum computing is an emerging paradigm that leverages the principles of quantum mechanics to process information in fundamentally new ways. Unlike classical computing, which relies on bits to represent data as either 0 or 1, quantum computing introduces the concept of qubits---quantum bits---that enable powerful computational capabilities through unique quantum phenomena.
+
+\begin{infobox}[title=Quantum Computing Fundamentals]
+    Quantum computing is an emerging paradigm that leverages the principles of quantum mechanics to process information in fundamentally new ways. Unlike classical computing, which relies on bits to represent data as either 0 or 1, quantum computing introduces the concept of qubits---quantum bits---that enable powerful computational capabilities through unique quantum phenomena.
+\end{infobox}
 
 \subsection{Qubits: The Quantum Information Unit}
-A qubit (just a fancy short for quantum bit) can exist not just in the classical states $\ket{0}$ or $\ket{1}$, but in a superposition of both:
-\[
-    \ket{\psi} = \alpha \ket{0} + \beta \ket{1}
-\]
-Here, $\alpha$ and $\beta$ are complex numbers called \emph{probability amplitudes}, and they determine the likelihood of the qubit being measured in state $\ket{0}$ or $\ket{1}$.
 
-\subsection{Superposition of Quantum States}
+\begin{definitionbox}[title=Qubit]
+    A qubit (just a fancy short for quantum bit) can exist not just in the classical states $\ket{0}$ or $\ket{1}$, but in a superposition of both:
+    \[
+        \ket{\psi} = \alpha \ket{0} + \beta \ket{1}
+    \]
+    Here, $\alpha$ and $\beta$ are complex numbers called \emph{probability amplitudes}, and they determine the likelihood of the qubit being measured in state $\ket{0}$ or $\ket{1}$.
+\end{definitionbox}
+
 Superposition is essentially the ability of a qubit to simultaneously represent a linear combination of both basis states, $\ket{0}$ and $\ket{1}$. The probabilities of measuring the qubit in each state are given by the squared magnitudes of the amplitudes:
 \[
     |\alpha|^2 + |\beta|^2 = 1
@@ -384,17 +452,11 @@ The process of measurement is inherently destructive to superposition, and its e
 
 \section{Quantum Fourier Transform (QFT)}
 
-The Quantum Fourier Transform (QFT) is a fundamental operation in quantum computing, serving as the quantum counterpart to the classical Discrete Fourier Transform (DFT).
+\begin{infobox}[title=QFT Overview]
+    The Quantum Fourier Transform (QFT) is a fundamental operation in quantum computing, serving as the quantum counterpart to the classical Discrete Fourier Transform (DFT).
 
-In classical computing, the DFT converts a sequence of complex numbers into another sequence that represents the frequency components of the original sequence. Similarly, the QFT operates on the amplitudes of a quantum state, transforming them into a superposition of states with different amplitudes.
-
-Mathematically, for a quantum state $\ket{x}$, the QFT is defined as:
-\[
-    \text{QFT}(\ket{x}) = \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} e^{2\pi i xk / N} \ket{k}
-\]
-where $N = 2^n$ for an $n$-qubit system. This transformation is unitary and reversible, preserving the total probability.
-
-\subsection{Understanding the QFT Mechanism}
+    In classical computing, the DFT converts a sequence of complex numbers into another sequence that represents the frequency components of the original sequence. Similarly, the QFT operates on the amplitudes of a quantum state, transforming them into a superposition of states with different amplitudes.
+\end{infobox}
 
 The QFT operates on an $n$-qubit quantum state $\ket{x}$, transforming it into a superposition of states weighted by complex exponential factors:
 \[
@@ -428,15 +490,11 @@ The QFT is instrumental in several quantum algorithms:
     \item \textbf{Quantum Phase Estimation}: Employs the QFT to estimate the phase (eigenvalues) of unitary operators, a critical component in various quantum algorithms.
 \end{itemize}
 
-These applications leverage the QFT's ability to analyze periodicity and phase information efficiently.
-
 \section{Shor's Algorithm}
 
-Shor's Algorithm is a groundbreaking quantum algorithm developed by mathematician Peter Shor in 1994. It efficiently factors large integers, a task that is computationally intensive for classical computers. This capability poses significant implications for cryptography, particularly for encryption methods like RSA that rely on the difficulty of prime factorization.
-
-\subsection{Overview}
-
-Shor's Algorithm efficiently factors large composite numbers, posing a significant threat to RSA cryptography. It reduces factoring to a period-finding problem, leveraging quantum parallelism for exponential speedup over classical methods. On a powerful quantum computer, it could break RSA by deriving private keys from public keys, undermining its security foundation.
+\begin{successbox}[title=Quantum Advantage]
+    Shor's Algorithm is a groundbreaking quantum algorithm developed by mathematician Peter Shor in 1994. It efficiently factors large integers, a task that is computationally intensive for classical computers. This capability poses significant implications for cryptography, particularly for encryption methods like RSA that rely on the difficulty of prime factorization.
+\end{successbox}
 
 \subsection{How Shor's Algorithm Works}
 
@@ -495,26 +553,23 @@ This code snippet demonstrates a simple implementation of Shor's Algorithm using
 
 \subsection{Time Complexity Analysis}
 
-The overall time complexity of Shor's Algorithm is:
-\[
-    \mathcal{O}((\log N)^3)
-\]
-where $N$ is the integer to be factored. This is a polynomial-time complexity, representing an exponential speedup over the best-known classical factoring algorithms. For instance, the General Number Field Sieve (GNFS), a classical algorithm, has a sub-exponential time complexity of approximately:
-\[
-    \mathcal{O}\left(e^{(\log N)^{1/3} (\log \log N)^{2/3}}\right)
-\]
-This stark contrast highlights the potential of quantum computing to solve certain problems much more efficiently than classical computing.
-
-\subsection{Implications for Cryptography}
-
-\begin{itemize}
-    \item \textbf{Threat to Data Security:} Encrypted data, including financial transactions and confidential communications, could be decrypted if intercepted and stored until quantum computers become powerful enough to run Shor's Algorithm.
-    \item \textbf{Necessity for Quantum-Resistant Cryptography:} The looming threat has accelerated the development of post-quantum cryptographic algorithms designed to withstand quantum attacks. Organizations like the National Institute of Standards and Technology (NIST) are leading efforts to standardize these new cryptographic methods.
-\end{itemize}
+\begin{notebox}[title=Performance Comparison]
+    The overall time complexity of Shor's Algorithm is:
+    \[
+        \mathcal{O}((\log N)^3)
+    \]
+    where $N$ is the integer to be factored. This is a polynomial-time complexity, representing an exponential speedup over the best-known classical factoring algorithms. For instance, the General Number Field Sieve (GNFS), a classical algorithm, has a sub-exponential time complexity of approximately:
+    \[
+        \mathcal{O}\left(e^{(\log N)^{1/3} (\log \log N)^{2/3}}\right)
+    \]
+    This stark contrast highlights the potential of quantum computing to solve certain problems much more efficiently than classical computing.
+\end{notebox}
 
 \section{Quantum Fixed-Point Attacks on RSA}
 
-Beyond Shor's algorithm, quantum computing introduces alternative methods to compromise RSA, such as fixed-point attacks. These attacks exploit the mathematical properties of RSA encryption to recover plaintext messages directly from ciphertexts without factoring the modulus \( n \).
+\begin{warningbox}[title=Alternative Threat Vector]
+    Beyond Shor's algorithm, quantum computing introduces alternative methods to compromise RSA, such as fixed-point attacks. These attacks exploit the mathematical properties of RSA encryption to recover plaintext messages directly from ciphertexts without factoring the modulus \( n \).
+\end{warningbox}
 
 \paragraph{Fixed-Point Concept:} In RSA, a fixed point is a value \( M \) satisfying \( M^e \equiv M \mod n \). While such points are rare and typically not useful in classical cryptanalysis, quantum algorithms can efficiently identify these fixed points.
 
@@ -524,70 +579,77 @@ Beyond Shor's algorithm, quantum computing introduces alternative methods to com
 
 
 \section{Practical Limitations of Quantum Computing}
-Despite their potential, quantum computers face several significant practical challenges:
 
-\begin{enumerate}
-    \item \textbf{Cost and Infrastructure:} Quantum systems are highly expensive to develop and maintain, requiring advanced infrastructure such as electromagnetic shielding and continuous monitoring. These demands currently restrict access to major corporations and research institutions.
+\begin{errorbox}[title=Current Challenges]
+    Despite their potential, quantum computers face several significant practical challenges:
 
-    \item \textbf{Software, Tooling, and Talent Gaps:} Quantum software development remains at an early stage. Although frameworks like Qiskit are emerging, they lack mature toolchains and robust developer ecosystems. There is also a limited pool of talent with quantum computing expertise.
+    \begin{enumerate}
+        \item \textbf{Cost and Infrastructure:} Quantum systems are highly expensive to develop and maintain, requiring advanced infrastructure such as electromagnetic shielding and continuous monitoring. These demands currently restrict access to major corporations and research institutions.
 
-    \item \textbf{Hardware Limitations and Scalability:} Building quantum systems with large numbers of qubits is critical to solving meaningful problems. However, scaling introduces control complexity, increased noise, and greater cooling requirements.
+        \item \textbf{Software, Tooling, and Talent Gaps:} Quantum software development remains at an early stage. Although frameworks like Qiskit are emerging, they lack mature toolchains and robust developer ecosystems. There is also a limited pool of talent with quantum computing expertise.
 
-    \item \textbf{Qubit Fragility and Decoherence:} Qubits must maintain delicate quantum states like superposition and entanglement, which are extremely sensitive to environmental disturbances such as temperature fluctuations and electromagnetic radiation. This leads to decoherence, one of the primary obstacles in practical quantum computation.
-\end{enumerate}
+        \item \textbf{Hardware Limitations and Scalability:} Building quantum systems with large numbers of qubits is critical to solving meaningful problems. However, scaling introduces control complexity, increased noise, and greater cooling requirements.
+
+        \item \textbf{Qubit Fragility and Decoherence:} Qubits must maintain delicate quantum states like superposition and entanglement, which are extremely sensitive to environmental disturbances such as temperature fluctuations and electromagnetic radiation. This leads to decoherence, one of the primary obstacles in practical quantum computation.
+    \end{enumerate}
+\end{errorbox}
 
 \section{Post-Quantum Cryptography Alternatives}
 
-\begin{itemize}
-    \item \textbf{Lattice-Based:} CRYSTALS-KYBER, DILITHIUM, NTRU, Falcon.
-    \item \textbf{Code-Based:} Classic McEliece.
-    \item \textbf{Hash-Based Signatures:} SPHINCS+, XMSS, LMS.
-    \item \textbf{Multivariate Polynomial:} Rainbow.
-    \item \textbf{Isogeny-Based:} SIKE (broken), FrodoKEM.
-\end{itemize}
+\begin{successbox}[title=Future-Proof Solutions]
+    \begin{itemize}
+        \item \textbf{Lattice-Based:} CRYSTALS-KYBER, DILITHIUM, NTRU, Falcon.
+        \item \textbf{Code-Based:} Classic McEliece.
+        \item \textbf{Hash-Based Signatures:} SPHINCS+, XMSS, LMS.
+        \item \textbf{Multivariate Polynomial:} Rainbow.
+        \item \textbf{Isogeny-Based:} SIKE (broken), FrodoKEM.
+    \end{itemize}
+\end{successbox}
 
 \newpage
 
 \section{Conclusion}
 
-This report has explored the vulnerabilities of RSA encryption, particularly in the context of quantum computing threats. We've examined conventional weaknesses such as poor prime selection, where techniques like \textbf{Fermat's factorization} can efficiently break RSA when primes are too close together, and \textbf{Elliptic Curve Factorization} when one prime is significantly smaller than the other.
+\begin{infobox}[title=Summary of Findings]
+    This report has explored the vulnerabilities of RSA encryption, particularly in the context of quantum computing threats. We've examined conventional weaknesses such as poor prime selection, where techniques like \textbf{Fermat's factorization} can efficiently break RSA when primes are too close together, and \textbf{Elliptic Curve Factorization} when one prime is significantly smaller than the other.
 
-The heart of our analysis focused on \textbf{quantum computing's ability to fundamentally undermine RSA's security guarantees}. Through an examination of quantum principles like superposition and the \textbf{Quantum Fourier Transform}, we demonstrated how \textbf{Shor's algorithm} provides an exponential speedup over classical factoring methods, reducing the time complexity from sub-exponential to polynomial \textbf{$\mathcal{O}((\log N)^3)$}. This efficiency makes it theoretically possible to break even large RSA keys in reasonable timeframes on sufficiently powerful quantum computers.
+    The heart of our analysis focused on \textbf{quantum computing's ability to fundamentally undermine RSA's security guarantees}. Through an examination of quantum principles like superposition and the \textbf{Quantum Fourier Transform}, we demonstrated how \textbf{Shor's algorithm} provides an exponential speedup over classical factoring methods, reducing the time complexity from sub-exponential to polynomial \textbf{$\mathcal{O}((\log N)^3)$}. This efficiency makes it theoretically possible to break even large RSA keys in reasonable timeframes on sufficiently powerful quantum computers.
 
-While \textit{quantum fixed-point attacks} offer alternative methods to compromise RSA encryption, significant practical challenges remain in quantum computing implementation:
+    While \textit{quantum fixed-point attacks} offer alternative methods to compromise RSA encryption, significant practical challenges remain in quantum computing implementation:
 
-\begin{itemize}
-    \item \textbf{Prohibitive costs and infrastructure requirements}
-    \item \textbf{Qubit fragility and decoherence}
-    \item \textbf{Lack of mature software development toolchains}
-\end{itemize}
+    \begin{itemize}
+        \item \textbf{Prohibitive costs and infrastructure requirements}
+        \item \textbf{Qubit fragility and decoherence}
+        \item \textbf{Lack of mature software development toolchains}
+    \end{itemize}
 
-The imminent threat to RSA has accelerated research into \textbf{post-quantum cryptographic alternatives}, with various approaches including:
+    The imminent threat to RSA has accelerated research into \textbf{post-quantum cryptographic alternatives}, with various approaches including:
 
-\begin{center}
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \rowcolor{gray!20} \textbf{Lattice-Based} & \textbf{Code-Based} & \textbf{Hash-Based} \\
-        \hline
-        CRYSTALS-KYBER                            & Classic McEliece    & SPHINCS+            \\
-        DILITHIUM                                 &                     & XMSS                \\
-        NTRU                                      &                     & LMS                 \\
-        \hline
-    \end{tabular}
-\end{center}
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+            \hline
+            \rowcolor{gray!20} \textbf{Lattice-Based} & \textbf{Code-Based} & \textbf{Hash-Based} \\
+            \hline
+            CRYSTALS-KYBER                            & Classic McEliece    & SPHINCS+            \\
+            DILITHIUM                                 &                     & XMSS                \\
+            NTRU                                      &                     & LMS                 \\
+            \hline
+        \end{tabular}
+    \end{center}
 
-Organizations like \textbf{NIST} are actively standardizing these new methods to ensure data security in a post-quantum world.
+    Organizations like \textbf{NIST} are actively standardizing these new methods to ensure data security in a post-quantum world.
 
-As quantum computing technology advances, the transition to \textbf{quantum-resistant cryptographic systems} becomes increasingly urgent. The future of secure communication will likely involve a hybrid approach during the transition period, ultimately leading to widespread adoption of post-quantum cryptographic standards that can withstand attacks from both classical and quantum adversaries.
+    As quantum computing technology advances, the transition to \textbf{quantum-resistant cryptographic systems} becomes increasingly urgent. The future of secure communication will likely involve a hybrid approach during the transition period, ultimately leading to widespread adoption of post-quantum cryptographic standards that can withstand attacks from both classical and quantum adversaries.
+\end{infobox}
 
 \newpage
 \section{Acknowledgements}
 
-We sincerely thank \textbf{Dr. Krishna Mohan Parattu} Sir for providing us with this valuable opportunity. We also acknowledge \textbf{Awaneesh Kumar Yadav} Sir and his course, Information Security and Privacy, for enriching our understanding of cryptography. Their guidance and encouragement were instrumental in shaping this project.
+We sincerely thank \textbf{Dr. Krishna Mohan Parattu} Sir for providing us with this valuable opportunity. We also acknowledge \textbf{Dr. Awaneesh Kumar Yadav} Sir and his course, Information Security and Privacy, for enriching our understanding of cryptography. Their guidance and encouragement were instrumental in shaping this project.
 
 We are grateful to \textbf{Anthropic} for offering the tools and resources that supported our development process.
 
-We extend our appreciation to open source resources like Qiskit, NumPy, and educational YouTube channels, especially \textbf{3Blue1Brown}, which have been invaluable in helping us visualize and understand complex mathematical concepts.
+We extend our appreciation to open source resources like Qiskit, NumPy, and educational YouTube channels, especially \textbf{3Blue1Brown} and \textbf{Veritasium}, which have been invaluable in helping us visualize and understand complex mathematical concepts.
 
 Lastly, we deeply appreciate our parents and peers for their constant support and motivation throughout this journey.
 
@@ -598,8 +660,13 @@ Lastly, we deeply appreciate our parents and peers for their constant support an
     \item 3Blue1Brown. (2018). "But what is the Fourier Transform? A visual introduction." [Video]. YouTube.
           \url{https://youtu.be/spUNpyF58BY}
 
-    \item Sabine Hossenfelder. (2022). "What the HECK is a Quantum Computer? Let us break it down for ya." [Video]. YouTube.
+    \item Veritasium. (2023). "How Quantum Computers Break The Internet... Starting Now" [Video]. YouTube.
+          \url{https://www.youtube.com/watch?v=-UrdExQW0cs}
+
+    \item minutephysics. (2019). "How Quantum Computers Break Encryption | Shor's Algorithm Explained" [Video]. YouTube.
           \url{https://youtu.be/lvTqbM5Dq4Q}
+
+    \item Paar, Christof, and Jan Pelzl. \textit{Understanding Cryptography: A Textbook for Students and Practitioners}. Springer, 2009.
 
     \item Obregon, A. (2023). "A Beginner's Guide to Quantum Computing Fundamentals." Medium.
           \url{https://medium.com/@AlexanderObregon/a-beginners-guide-to-quantum-computing-fundamentals-c11de9187892}
