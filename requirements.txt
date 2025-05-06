@@ -21,5 +21,3 @@ seaborn==0.13.2
 streamlit==1.29.0
 symengine==0.13.0
 sympy==1.13.3
-tweedledum==1.1.1
-z3-solver==4.14.1.0
