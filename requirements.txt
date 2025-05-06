@@ -11,6 +11,7 @@ networkx==3.4.2
 numpy==2.2.5
 openqasm3==1.0.1
 pandas==2.2.3
+plotly==5.18.0
 pydot==3.0.4
 pydub==0.25.1
 pyglet==2.1.4
@@ -23,6 +24,7 @@ qiskit-qasm3-import==0.5.1
 qiskit-terra==0.20.2
 scipy==1.15.2
 seaborn==0.13.2
+streamlit==1.29.0
 symengine==0.13.0
 sympy==1.13.3
 tweedledum==1.1.1
