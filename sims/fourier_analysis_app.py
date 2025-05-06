@@ -1,6 +1,5 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -121,10 +120,27 @@ def create_wrapping_visualization(signal, t, wrap_freq):
     
     return fig, cm_magnitude
 
+# Function to display info tooltips
+def info_tooltip(title, content):
+    with st.expander(f"ℹ️ {title} Info"):
+        st.markdown(content)
+
 # ---------- Wave Composition Tab ----------
 with tab1:
     st.header("Composite Wave Generator")
     st.write("Create a composite signal by combining multiple sine waves with different frequencies and amplitudes.")
+    
+    info_tooltip("Wave Composition", """
+    This tab allows you to create complex waveforms by combining sine waves of different frequencies and amplitudes.
+    
+    **How to use:**
+    1. Adjust the sampling parameters in the sidebar
+    2. Set the number of component waves
+    3. Define the frequency and amplitude for each component
+    4. View the resulting composite signal and its components
+    
+    The composite signal is passed to other tabs for further analysis.
+    """)
     
     # Sampling parameters
     st.sidebar.header("Sampling Parameters")
@@ -165,29 +181,52 @@ with tab1:
     # Visualization of waves
     st.subheader("Wave Visualization")
     
-    fig = plt.figure(figsize=(12, 10))
+    info_tooltip("Wave Visualization", """
+    This visualization shows:
+    
+    **Top Plot**: The composite signal resulting from the sum of all component waves.
+    
+    **Bottom Plot**: Each individual component wave shown separately.
+    
+    Observe how different frequencies and amplitudes combine to create complex waveforms.
+    """)
+    
+    # Create plotly figure with subplots
+    fig = make_subplots(rows=2, cols=1, 
+                        subplot_titles=("Composite Signal", "Individual Components"),
+                        vertical_spacing=0.15)
     
     # Plot 1: Composite signal
-    plt.subplot(2, 1, 1)
-    plt.plot(t, composite_signal, color='#8CD9B3')
-    plt.title('Composite Signal')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.grid(True)
+    fig.add_trace(
+        go.Scatter(x=t, y=composite_signal, 
+                  mode='lines', 
+                  line=dict(color='#8CD9B3', width=2),
+                  name="Composite Signal"),
+        row=1, col=1
+    )
     
     # Plot 2: Individual components
-    plt.subplot(2, 1, 2)
     for i, wave in enumerate(individual_waves):
-        plt.plot(t, wave, label=f'{frequencies[i]} Hz Component (Amplitude = {amplitudes[i]})')
+        fig.add_trace(
+            go.Scatter(x=t, y=wave, 
+                      mode='lines',
+                      name=f'{frequencies[i]} Hz Component (Amplitude = {amplitudes[i]})'),
+            row=2, col=1
+        )
     
-    plt.title('Individual Components')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+    # Update layout
+    fig.update_layout(height=700, 
+                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                     hovermode="closest")
     
-    st.pyplot(fig)
+    # Update axis labels
+    fig.update_xaxes(title_text="Time (s)", row=1, col=1)
+    fig.update_yaxes(title_text="Amplitude", row=1, col=1)
+    
+    fig.update_xaxes(title_text="Time (s)", row=2, col=1)
+    fig.update_yaxes(title_text="Amplitude", row=2, col=1)
+    
+    st.plotly_chart(fig, use_container_width=True)
     
     # Calculate FFT for this composite signal
     positive_freqs, positive_amps = compute_fft(composite_signal, fs, t)
@@ -205,6 +244,23 @@ with tab1:
 with tab2:
     st.header("Wrapping Visualization")
     st.write("Visualize how the signal wraps around different frequencies and observe the resulting center of gravity.")
+    
+    info_tooltip("Wrapping Visualization", """
+    This tab demonstrates the concept of frequency wrapping, which is the basis for Fourier analysis.
+    
+    **What is wrapping?**
+    - The signal is "wrapped" around a circle at different frequencies
+    - When wrapping at a frequency present in the signal, the points will cluster on one side
+    - This creates a center of mass (red dot) that moves away from the origin
+    
+    **The plots show:**
+    1. Original signal in time domain
+    2. Signal plotted against wrapped phase
+    3. Circular representation of the wrapped signal
+    4. The path created by connecting wrapped points in sequence
+    
+    The center of mass magnitude peaks when the wrapping frequency matches a component frequency in the signal.
+    """)
     
     if 'composite_signal' not in st.session_state:
         st.warning("Please define your composite signal in the 'Wave Composition' tab first.")
@@ -233,34 +289,78 @@ with tab2:
         # Center of Gravity vs Wrapping Frequency
         st.subheader("Center of Gravity vs Wrapping Frequency")
         
+        info_tooltip("Center of Gravity Analysis", """
+        This plot shows how the Center of Mass (CoM) magnitude changes as we sweep through different wrapping frequencies.
+        
+        **Key insights:**
+        - Peaks in this plot correspond to frequencies present in the original signal
+        - The height of each peak relates to the amplitude of that frequency component
+        - Vertical dashed lines mark the known component frequencies
+        - This provides an alternative way to identify frequency components compared to FFT
+        """)
+        
         # Create range of wrapping frequencies to analyze
         wrapping_freqs = np.linspace(wrap_freq_min, wrap_freq_max, 500)
         cog_values = calculate_wrapping_metrics(composite_signal, t, wrapping_freqs)
         
-        # Plot CoG vs Wrapping Frequency
-        cog_fig = plt.figure(figsize=(10, 6))
-        plt.plot(wrapping_freqs, cog_values, color='#E57373')
-        plt.title('Center of Mass Magnitude vs Wrapping Frequency', fontsize=14)
-        plt.xlabel('Frequency (Hz)', fontsize=14)
-        plt.ylabel('Magnitude', fontsize=14)
-        plt.grid(True)
+        # Create plotly figure for CoG vs Wrapping Frequency
+        cog_fig = go.Figure()
         
-        # Mark known frequencies
+        # Add main line
+        cog_fig.add_trace(
+            go.Scatter(x=wrapping_freqs, y=cog_values, 
+                      mode='lines', 
+                      line=dict(color='#E57373', width=2),
+                      name="Center of Mass Magnitude")
+        )
+        
+        # Mark known frequencies with vertical lines and points
         for freq in component_freqs:
-            plt.axvline(x=freq, linestyle='--', alpha=0.7, 
-                       label=f'{freq} Hz Component')
+            # Add vertical line
+            cog_fig.add_vline(x=freq, line_width=1.5, line_dash="dash", 
+                            line_color="gray", opacity=0.7)
             
             # Find and mark peak
             idx = np.argmin(np.abs(wrapping_freqs - freq))
-            plt.plot(wrapping_freqs[idx], cog_values[idx], 'o', color='red', markersize=8)
+            cog_fig.add_trace(
+                go.Scatter(x=[wrapping_freqs[idx]], y=[cog_values[idx]], 
+                          mode='markers',
+                          marker=dict(color='red', size=8),
+                          name=f"{freq} Hz Component")
+            )
         
-        plt.legend()
-        st.pyplot(cog_fig)
+        # Update layout
+        cog_fig.update_layout(
+            title='Center of Mass Magnitude vs Wrapping Frequency',
+            xaxis_title='Frequency (Hz)',
+            yaxis_title='Magnitude',
+            height=500,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            hovermode="closest"
+        )
+        
+        st.plotly_chart(cog_fig, use_container_width=True)
 
 # ---------- Fourier Analysis Tab ----------
 with tab3:
     st.header("Fourier Analysis")
     st.write("Perform Fourier Transform analysis on the composite signal to identify its component frequencies.")
+    
+    info_tooltip("Fourier Analysis", """
+    This tab shows the results of Fast Fourier Transform (FFT) analysis on the composite signal.
+    
+    **What is FFT?**
+    The FFT decomposes a time-domain signal into its frequency components, revealing:
+    - Which frequencies are present in the signal
+    - The amplitude (strength) of each frequency component
+    
+    **In the plots:**
+    - The stem plot shows the frequency spectrum from the FFT analysis
+    - The comparison plot shows both FFT and Center of Gravity methods side by side
+    - Vertical lines mark the known component frequencies
+    
+    The FFT and Center of Gravity methods should both identify the same frequency components.
+    """)
     
     if 'composite_signal' not in st.session_state:
         st.warning("Please define your composite signal in the 'Wave Composition' tab first.")
@@ -274,16 +374,28 @@ with tab3:
         component_freqs = st.session_state['component_freqs']
         component_amps = st.session_state['component_amps']
         
-        # Create FFT plot
-        fft_fig = plt.figure(figsize=(12, 6))
-        plt.stem(positive_freqs, positive_amps, linefmt='r-', markerfmt='ro')
-        plt.title('Frequency Spectrum (FFT Analysis)', fontsize=16)
-        plt.xlabel('Frequency (Hz)', fontsize=14)
-        plt.ylabel('Amplitude', fontsize=14)
+        # Create FFT plot using Plotly
+        fft_fig = go.Figure()
+        
+        # Add stem plot
+        for i, (freq, amp) in enumerate(zip(positive_freqs, positive_amps)):
+            fft_fig.add_trace(
+                go.Scatter(x=[freq, freq], y=[0, amp], 
+                          mode='lines',
+                          line=dict(color='red', width=1),
+                          showlegend=False)
+            )
+            fft_fig.add_trace(
+                go.Scatter(x=[freq], y=[amp], 
+                          mode='markers',
+                          marker=dict(color='red', size=8),
+                          showlegend=(i == 0),
+                          name="FFT Magnitude")
+            )
         
         # Focus on relevant frequencies
         max_freq_to_show = max(20, max(component_freqs) * 2)
-        plt.xlim(0, max_freq_to_show)
+        fft_fig.update_xaxes(range=[0, max_freq_to_show])
         
         # Annotate known component frequencies
         for freq, amp in zip(component_freqs, component_amps):
@@ -291,16 +403,46 @@ with tab3:
             actual_freq = positive_freqs[idx]
             actual_amp = positive_amps[idx]
             
-            plt.annotate(f'{actual_freq:.1f} Hz\nAmp: {actual_amp:.2f}',
-                         xy=(actual_freq, actual_amp),
-                         xytext=(actual_freq, actual_amp + 0.2),
-                         ha='center')
+            fft_fig.add_annotation(
+                x=actual_freq,
+                y=actual_amp + 0.2,
+                text=f"{actual_freq:.1f} Hz<br>Amp: {actual_amp:.2f}",
+                showarrow=True,
+                arrowhead=2,
+                arrowcolor="black",
+                arrowsize=1,
+                arrowwidth=1
+            )
         
-        plt.grid(True)
-        st.pyplot(fft_fig)
+        # Update layout
+        fft_fig.update_layout(
+            title='Frequency Spectrum (FFT Analysis)',
+            xaxis_title='Frequency (Hz)',
+            yaxis_title='Amplitude',
+            height=500,
+            hovermode="closest"
+        )
+        
+        st.plotly_chart(fft_fig, use_container_width=True)
         
         # Comparison of methods
         st.subheader("Frequency Analysis Methods Comparison")
+        
+        info_tooltip("Methods Comparison", """
+        This comparison shows how different frequency analysis methods identify components in the signal.
+        
+        **FFT Analysis:**
+        - Mathematically decomposes the signal into frequency components
+        - Shows precise amplitude information
+        - Standard approach for spectral analysis
+        
+        **Center of Gravity Analysis:**
+        - Based on how the signal "wraps" at different frequencies
+        - Peaks correspond to frequencies present in the signal
+        - Provides an intuitive geometric interpretation
+        
+        Both methods should identify the same frequency components in the signal, though with different scaling.
+        """)
         
         # Create DataFrame to compare FFT peaks with Center of Gravity analysis
         comparison_data = []
@@ -341,41 +483,48 @@ with tab3:
         for i, (freq, amp) in enumerate(zip(component_freqs, component_amps)):
             st.write(f"Component {i+1}: {freq:.2f} Hz with amplitude {amp:.2f}")
         
-        # Plot all methods together
-        methods_fig = plt.figure(figsize=(12, 8))
+        # Plot all methods together using Plotly
+        methods_fig = go.Figure()
         
         # Plot CoG
-        plt.plot(wrapping_freqs, cog_values, color='#E57373', label='Center of Gravity')
+        methods_fig.add_trace(
+            go.Scatter(x=wrapping_freqs, y=cog_values, 
+                      mode='lines', 
+                      line=dict(color='#E57373', width=2),
+                      name='Center of Gravity')
+        )
         
         # Normalize FFT amplitudes for better visualization
         fft_norm = positive_amps / np.max(positive_amps) * np.max(cog_values)
         
-        # Create interpolated FFT curve for better visualization
-        from scipy.interpolate import interp1d
-        
+        # Use Plotly's native interpolation by setting line shape
         # Limit to relevant frequency range
         mask = positive_freqs <= max_freq_to_show
         pos_freqs_limited = positive_freqs[mask]
         pos_amps_limited = fft_norm[mask]
         
-        # Only interpolate if we have enough points
-        if len(pos_freqs_limited) > 5:
-            f_interp = interp1d(pos_freqs_limited, pos_amps_limited, kind='cubic',
-                               bounds_error=False, fill_value=0)
-            freqs_interp = np.linspace(0, max_freq_to_show, 1000)
-            amps_interp = f_interp(freqs_interp)
-            plt.plot(freqs_interp, amps_interp, color='#64B5F6', label='FFT (normalized)', alpha=0.7)
-        else:
-            plt.plot(pos_freqs_limited, pos_amps_limited, color='#64B5F6', label='FFT (normalized)', alpha=0.7)
-        
-        plt.title('Comparison of Frequency Analysis Methods', fontsize=16)
-        plt.xlabel('Frequency (Hz)', fontsize=14)
-        plt.ylabel('Magnitude', fontsize=14)
-        plt.grid(True)
-        plt.legend()
+        # Add FFT data with interpolation
+        methods_fig.add_trace(
+            go.Scatter(x=pos_freqs_limited, y=pos_amps_limited, 
+                      mode='lines', 
+                      line=dict(color='#64B5F6', width=2, shape='spline'),
+                      name='FFT (normalized)',
+                      opacity=0.7)
+        )
         
         # Mark known frequencies
         for freq in component_freqs:
-            plt.axvline(x=freq, linestyle='--', alpha=0.5, color='gray')
+            methods_fig.add_vline(x=freq, line_width=1.5, line_dash="dash", 
+                                line_color="gray", opacity=0.5)
         
-        st.pyplot(methods_fig)
+        # Update layout
+        methods_fig.update_layout(
+            title='Comparison of Frequency Analysis Methods',
+            xaxis_title='Frequency (Hz)',
+            yaxis_title='Magnitude',
+            height=600,
+            hovermode="closest",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        
+        st.plotly_chart(methods_fig, use_container_width=True)
